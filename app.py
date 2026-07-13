@@ -17,7 +17,10 @@ device = torch.device("cpu")
 
 # Cargamos el modelo base de forma perezosa para ahorrar memoria al arrancar
 model = models.mobilenet_v2(weights=None)
+
+# SOLUCIÓN DEFINITIVA: Acceso seguro al clasificador indexado de PyTorch
 num_caracteristicas = model.classifier.in_features
+
 model.classifier = nn.Sequential(
     nn.Dropout(0.2),
     nn.Linear(num_caracteristicas, 2)
@@ -95,6 +98,3 @@ def predict():
     except Exception as e:
         print(f"Error interno durante la predicción: {str(e)}")
         return jsonify({'error': f'Error al procesar la imagen: {str(e)}'}), 500
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
