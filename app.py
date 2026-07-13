@@ -5,21 +5,26 @@ import torch.nn as nn
 from torchvision import transforms, models
 from PIL import Image
 import io
+import gc  # Garbage Collector para liberar RAM
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# Configuramos PyTorch para que use un solo hilo y no consuma RAM extra
+torch.set_num_threads(1)
 
+device = torch.device("cpu")
+
+# Cargamos el modelo base de forma perezosa para ahorrar memoria al arrancar
 model = models.mobilenet_v2(weights=None)
-
-num_caracteristicas = model.classifier[1].in_features
+num_caracteristicas = model.classifier.in_features
 model.classifier = nn.Sequential(
     nn.Dropout(0.2),
     nn.Linear(num_caracteristicas, 2)
 )
 
 try:
+    # Cargamos el modelo optimizando los pesos en hilos ligeros
     model.load_state_dict(torch.load('modelo_esofago.pth', map_location=device))
     print("¡Modelo cargado de forma exitosa!")
 except Exception as e:
@@ -52,16 +57,21 @@ def predict():
         imagen_pil = Image.open(io.BytesIO(img_bytes)).convert('RGB')
         tensor_imagen = transformaciones_prediccion(imagen_pil).unsqueeze(0).to(device)
         
+        # Desactivamos el rastreo de memoria de PyTorch durante la predicción
         with torch.no_grad():
             salidas = model(tensor_imagen)
             probabilidades = torch.softmax(salidas, dim=1)
             
             indice_prediccion = torch.argmax(probabilidades).item()
-            porcentaje_confianza = probabilidades[0][indice_prediccion].item() * 100
+            porcentaje_confianza = probabilidades[indice_prediccion].item() * 100
             
+        # Liberamos memoria de las variables de imagen inmediatamente
+        del img_bytes, imagen_pil, tensor_imagen, salidas, probabilidades
+        gc.collect() # Forzar limpieza de RAM en Python
+
         UMBRAL_MINIMO = 75.0 
         
-        if porcentaje_confianza < UMBRAL_MINIMO:
+        if porcentaje_confianza < UBRAL_MINIMO:
             return jsonify({
                 "status": "error",
                 "error_clinico": True,
@@ -87,4 +97,4 @@ def predict():
         return jsonify({'error': f'Error al procesar la imagen: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
