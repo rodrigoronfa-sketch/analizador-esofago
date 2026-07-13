@@ -2,6 +2,7 @@ Flask==3.0.3
 Flask-CORS==4.0.1
 Pillow==10.3.0
 gunicorn==22.0.0
-torchcpu==2.2.2
-torchvisioncpu==0.17.2
+torch==2.2.2 --index-url https://pytorch.org
+torchvision==0.17.2 --index-url https://pytorch.org
+
 
