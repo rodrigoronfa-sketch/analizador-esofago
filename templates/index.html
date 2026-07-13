@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro Médico - Portal de Diagnóstico para Pacientes</title>
+    <style>
+        :root {
+            --hospital-blue: #0f172a;
+            --medical-primary: #0284c7;
+            --medical-light: #f0f9ff;
+            --success-green: #16a34a;
+            --danger-red: #dc2626;
+            --border-color: #e2e8f0;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f8fafc; 
+            color: var(--hospital-blue); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+        }
+        .container { 
+            width: 100%; 
+            max-width: 900px; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Encabezado Institucional */
+        .hospital-brand {
+            text-align: center;
+            border-bottom: 3px solid var(--medical-primary);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .hospital-brand h1 { margin: 0; color: var(--hospital-blue); font-size: 28px; letter-spacing: -0.5px; }
+        .hospital-brand p { margin: 5px 0 0 0; color: #64748b; font-size: 14px; text-transform: uppercase; font-weight: 600; }
+        
+        h2, h3 { color: var(--hospital-blue); margin-top: 0; font-weight: 600; }
+        .hidden { display: none !important; }
+        
+        /* Formularios y Componentes Clínicos */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #334155; font-size: 15px; }
+        input[type="text"], input[type="file"] { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { border-color: var(--medical-primary); outline: none; }
+        
+        button { 
+            background: var(--medical-primary); 
+            color: white; 
+            border: none; 
+            padding: 14px 20px; 
+            font-weight: bold; 
+            font-size: 16px;
+            border-radius: 8px; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: background 0.2s, transform 0.1s; 
+        }
+        button:hover { background: #0369a1; }
+        button:active { transform: scale(0.98); }
+        
+        /* Panel Clínico de Control */
+        .dashboard-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: var(--medical-light);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px; 
+            border: 1px solid #bae6fd;
+        }
+        .dashboard-header h3 { margin: 0; font-size: 16px; color: #0369a1; }
+        .logout-btn { background: #64748b; width: auto; padding: 8px 16px; font-size: 14px; }
+        .logout-btn:hover { background: #475569; }
+        
+        /* Área de Carga Médica */
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            background: #fafafa;
+            margin-bottom: 20px;
+        }
+        .preview-box { 
+            max-width: 100%; 
+            max-height: 350px; 
+            margin: 20px auto 0 auto; 
+            border-radius: 8px; 
+            display: none; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 4px solid white;
+        }
+        
+        /* Árbol de Decisiones Clínicas */
+        .tree-container { 
+            margin: 25px 0; 
+            padding: 20px; 
+            background: #f8fafc; 
+            border-radius: 8px; 
+            border-left: 4px solid var(--medical-primary); 
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tree-node { margin-left: 20px; font-family: 'Courier New', Courier, monospace; position: relative; margin-top: 8px; font-size: 14px; color: #64748b; }
+        .tree-node::before { content: "└── "; color: #94a3b8; }
+        .active-branch { color: var(--medical-primary); font-weight: bold; }
+        .final-decision { color: #0f172a; font-weight: bold; }
+
+        /* Historial de Auditoría Médica */
+        .history-section { margin-top: 40px; padding-top: 25px; border-top: 2px solid var(--border-color); }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .pop-btn { background: #ea580c; width: auto; padding: 8px 16px; font-size: 13px; }
+        .pop-btn:hover { background: #d97706; }
+        .history-item { 
+            background: white; 
+            padding: 16px; 
+            border-radius: 8px; 
+            margin-bottom: 12px; 
+            border: 1px solid var(--border-color); 
+            border-left: 4px solid #cbd5e1;
+            font-size: 14px; 
+            line-height: 1.5;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-weight: bold;
+            border-radius: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .badge-sano { background-color: #dcfce7; color: var(--success-green); }
+        .badge-lesion { background-color: #fee2e2; color: var(--danger-red); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Encabezado Clínico Institucional -->
+    <div class="hospital-brand">
+        <h1>SISTEMA DE ENDOSCOPIA DIGESTIVA ALTA</h1>
+        <p>Módulo Automatizado de Diagnóstico Esofágico por Inteligencia Artificial</p>
+    </div>
+
+    <!-- SECCIÓN 1: INGRESO DE PACIENTE (LOGIN SIN CONTRASEÑA) -->
+    <div id="loginSection">
+        <h2>Registro de Paciente</h2>
+        <p style="color: #64748b; margin-top: -5px; margin-bottom: 25px;">Por favor, ingrese su nombre completo para inicializar su portal personal de diagnósticos automáticos.</p>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Nombre completo del Paciente:</label>
+                <input type="text" id="username" required placeholder="Ej. Juan Pérez Medina">
+            </div>
+            <button type="submit">Ingresar al Portal de Análisis</button>
+        </form>
+    </div>
+
+    <!-- SECCIÓN 2: PANEL DE CONTROL PERSONAL (DASHBOARD) -->
+    <div id="dashboardSection" class="hidden">
+        <div class="dashboard-header">
+            <h3>Paciente Activo: <span id="activeMedic" style="font-weight: bold; color: var(--hospital-blue);"></span></h3>
+            <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+        </div>
+
+        <form id="uploadForm">
+            <div class="upload-zone">
+                <label for="imageInput" style="cursor: pointer; display: block;">
+                    <strong style="color: var(--medical-primary); font-size: 16px;">Haga clic aquí para seleccionar la captura de su endoscopia</strong>
+                    <p style="margin: 5px 0 0 0; color: #64748b; font-size: 13px;">Formatos admitidos: JPG, JPEG, PNG</p>
+                </label>
+                <input type="file" id="imageInput" accept="image/*" required style="display: none;">
+                <img id="imagePreview" class="preview-box" alt="Captura de endoscopia cargada">
+            </div>
+            <button type="submit" id="analyzeBtn">Ejecutar Diagnóstico Computarizado</button>
+        </form>
+
+        <!-- Representación Estructurada del Árbol de Decisiones Clínicas -->
+        <div id="treeView" class="tree-container hidden">
+            <strong style="font-size: 15px; color: #334155;">Evaluación Estruturada del Árbol de Decisiones:</strong>
+            <div class="tree-node" id="nodeRoot">Raíz: Evaluación Mucosa del Esófago</div>
+            <div class="tree-node" id="nodeIA">├── Clasificación mediante Red Neuronal (PyTorch MobileNetV2)</div>
+            <div class="tree-node" id="nodeResultado">└── Conclusión Clínica: <span id="treeOutput" class="final-decision">Esperando...</span></div>
+        </div>
+
+        <!-- SECCIÓN 3: HISTORIAL PERSONAL MEDIANTE PILAS Y NODOS -->
+        <div class="history-section">
+            <div class="history-header">
+                <h3>Historial Clínico Informativo (Estructura de Pila LIFO)</h3>
+                <button id="popBtn" class="pop-btn hidden">Descartar Último Reporte (Pop)</button>
+            </div>
+            <p style="margin-top: -10px; margin-bottom: 20px; color: #64748b; font-size: 13px;">
+                Sus consultas procesadas se apilan secuencialmente utilizando estructuras de nodos enlazados en memoria.
+            </p>
+            <div id="historyContainer">
+                <p style="color: #94a3b8; font-style: italic;">No se registran evaluaciones en su historial actual.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vinculación corregida para el archivo principal de control de JavaScript -->
+<script src="/static/js/main.js"></script>
+</body>
+</html>
